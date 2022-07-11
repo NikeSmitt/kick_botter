@@ -46,7 +46,8 @@ def revert_users(message):
         
         # проверяем, что существует инвайт линк
         export_invite_link = db.get_last_invite_link(group_id)
-        cool_logger.debug(f'Получена инвайт ссылка из бд для группы {group_id}')
+        if export_invite_link:
+            cool_logger.debug(f'Получена инвайт ссылка из бд для группы {group_id}')
         
         if not export_invite_link:
             # Создаем основную ссылку для приглашения в группу
@@ -99,6 +100,8 @@ def revert_users(message):
                 try:
                     # сначала разбаниваем пользователя
                     bot.unban_chat_member(group_id, user_id, only_if_banned=True)
+                    # отправляем ссылку
+                    bot.send_message(user_id, f"{group_name}\n{new_invite_link}")
                 
                 except Exception as err:
                     cool_logger.error(f'Ошибка разбана пользователя {username} для группы {group_name}')
@@ -107,8 +110,6 @@ def revert_users(message):
                 else:
                     # если все успешно, то увеличиваем счетчик
                     all_users += 1
-                    # отправляем ссылку
-                    bot.send_message(user_id, f"{group_name}\n{new_invite_link}")
                     
                     # удаляем пользователя из группы в бд
                     if db.delete_user_in_group(group_id, user_id):

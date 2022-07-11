@@ -12,9 +12,9 @@ cool_logger = logging.getLogger('bot_logger')
 
 class MySQLHandler:
     
-    def __init__(self):
+    def __init__(self, config=mysql_config):
         try:
-            self.connector = connection.MySQLConnection(**mysql_config)
+            self.connector = connection.MySQLConnection(**config)
             self.cursor = self.connector.cursor(buffered=True)
         
         except mysql.connector.Error as err:
@@ -118,7 +118,7 @@ class MySQLHandler:
         try:
             self.cursor.execute(update_user, data_user)
             self.connector.commit()
-            print('Данные пользователя (kicked) в таблице users_in_groups обновлены')
+            # print('Данные пользователя (kicked) в таблице users_in_groups обновлены')
         except mysql.connector.Error as err:
             print(err)
         
@@ -809,6 +809,6 @@ class MySQLHandler:
         return result[0] if result else False
     
     
-    def __del__(self):
-        self.cursor.close()
-        self.connector.close()
+    # def __del__(self):
+    #     self.cursor.close()
+    #     self.connector.close()
