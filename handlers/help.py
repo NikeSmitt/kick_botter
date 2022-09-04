@@ -29,6 +29,8 @@ def get_help(message):
                 "get_stat - Получить статистику",
                 "run - Формат: run file.sh",
                 "logs - Получить файл логов Формат: logs 31-12-2001",
+                "add_users - Запускает опрос на добавление списка пользователей в группу",
+                "check - Проверка количества пользователей в группах в БД и telegram",
             ]
             help_message = '\n'.join(help_messages)
             bot.send_message(message.chat.id, help_message)

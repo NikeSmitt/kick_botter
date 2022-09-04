@@ -1,15 +1,17 @@
 import json
 import time
+from datetime import datetime
 
 import requests
+from telebot.apihelper import ApiTelegramException
 
 import config
 from MySQLHandler import MySQLHandler
 from bot import bot, cool_logger
-from utils import create_time_stamp
+from utils import create_time_stamp, TIME_FORMAT
 
 
-@bot.message_handler(commands=['revert'])
+@bot.message_handler(commands=['revert'], for_root=True)
 def revert_users(message):
     """
     Команда «revert»: Бот генерирует для всех «Групп» пригласительные ссылки и
@@ -27,15 +29,13 @@ def revert_users(message):
     telebot_api_count = 1
     REPEATS = 30
     
-    # проверяем права пользователя
-    if not db.is_root(message.from_user.id):
-        print(f'У пользователя {message.from_user.id} нет прав на выполнение данной команды')
-        bot.send_message(message.chat.id, 'У вас нет прав на выполнение данной команды')
-        return
-    
     groups_id = db.get_all_groups()
     all_groups = 0
     all_users = 0
+
+    # собираем все ошибки "когда действие не 200 ОК"
+    errors_for_user = []
+    
     for group_id in groups_id:
         
         # засыпаем после отправки необходимого количества запросов и обновляем счетчик
@@ -55,9 +55,13 @@ def revert_users(message):
                 export_chat_invite_link = bot.export_chat_invite_link(group_id)
                 cool_logger.debug(f'Создана инвайт ссылка для группы {group_id}')
             
-            except Exception as err:
+            except ApiTelegramException as err:
                 cool_logger.error(f'Ошибка создания инвайт ссылки для группы {group_id}')
                 cool_logger.error(f'{err}')
+
+                t = datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
+                group = db.get_group_name(group_id)
+                errors_for_user.append(f'{t} / {group} / {err.result_json["description"]}')
             
             else:
                 # Сохраняем инвайт ссылку
@@ -103,9 +107,12 @@ def revert_users(message):
                     # отправляем ссылку
                     bot.send_message(user_id, f"{group_name}\n{new_invite_link}")
                 
-                except Exception as err:
+                except ApiTelegramException as err:
                     cool_logger.error(f'Ошибка разбана пользователя {username} для группы {group_name}')
                     cool_logger.error(err)
+
+                    t = datetime.now().strftime(TIME_FORMAT)
+                    errors_for_user.append(f'{t} / {group_name} / {username} / {err.result_json["description"]}')
                 
                 else:
                     # если все успешно, то увеличиваем счетчик
@@ -119,3 +126,7 @@ def revert_users(message):
     
     info_mes = f"Выполнена команда 'revert' для {all_users} пользователь(ей) / {len(groups_id)} групп(ы)"
     bot.send_message(message.from_user.id, info_mes)
+
+    # собираем сообщение с ошибками
+    error_mes = '\n'.join(errors_for_user)
+    bot.send_message(message.from_user.id, error_mes)

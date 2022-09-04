@@ -64,7 +64,7 @@ class WebhookServer(object):
 
 if __name__ == '__main__':
     
-    print(bot.message_handlers)
+    # print(bot.message_handlers)
     
     # Remove webhook, it fails sometimes the set if there is a previous webhook
     

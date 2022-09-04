@@ -1,11 +1,14 @@
+from datetime import datetime
 import time
+
+from telebot.apihelper import ApiTelegramException
 
 from MySQLHandler import MySQLHandler
 from bot import bot, cool_logger
 from utils import create_time_stamp
 
 
-@bot.message_handler(commands=['wipe'])
+@bot.message_handler(commands=['wipe'], for_root=True)
 def wipe_users(message):
     """
     Команда «wipe»: Бот собирает актуальный список пользователей в каждой
@@ -23,19 +26,17 @@ def wipe_users(message):
     telebot_api_count = 1
     REPEATS = 30
     
-    # print(message.chat.id)
-    
-    # проверяем права пользователя
-    if not db.is_root(message.from_user.id):
-        print(f'У пользователя {message.from_user.id} нет прав на выполнение данной команды')
-        bot.send_message(message.chat.id, 'У вас нет прав на выполнение данной команды')
-        return
-    
+    # список всех групп в базе
     groups = db.get_all_groups()
     
     # счетчики групп и пользователей, которых удалили
     all_groups = 0
     all_users = 0
+    
+    # собираем все ошибки "когда действие не 200 ОК"
+    errors_for_user = []
+    
+    
     for group_id in groups:
         
         # логирование
@@ -63,9 +64,13 @@ def wipe_users(message):
             
             try:
                 chat_member = bot.get_chat_member(group_id, user_id)
-            except Exception as err:
+            except ApiTelegramException as err:
                 cool_logger.error(f'Ошибка получения пользователя {username} из группы {group_name} в телеге')
                 cool_logger.error(err)
+                
+                t = datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
+                group = db.get_group_name(group_id)
+                errors_for_user.append(f'{t} / {group} / {username} / {err.result_json["description"]}')
             else:
                 # счетчик кикнутых пользователей
                 all_users += 1
@@ -86,9 +91,13 @@ def wipe_users(message):
                 bot.ban_chat_member(group_id, user_id, next_year)
                 # db.update_user_kicked(user_id, kicked=True)
                 # bot.unban_chat_member(group_id, user_id)
-            except Exception as err:
+            except ApiTelegramException as err:
                 cool_logger.error(f'ОШИБКА! Попытка кикнуть пользователя {username} из группы {group_name}')
                 cool_logger.error(err)
+
+                t = datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
+                group = db.get_group_name(group_id)
+                errors_for_user.append(f'{t} / {group} / {username} / {err.result_json["description"]}')
             
             else:
                 if db.update_group_user_kicked(group_id, user_id, kicked=True):
@@ -96,5 +105,10 @@ def wipe_users(message):
     
     info_mes = f"Выполнена команда 'wipe' - из {len(groups)} групп(ы) удалено {all_users} " \
                f"пользователь(ей) "
+
     bot.send_message(message.from_user.id, info_mes)
+    
+    # собираем сообщение с ошибками
+    error_mes = '\n'.join(errors_for_user)
+    bot.send_message(message.from_user.id, error_mes)
 

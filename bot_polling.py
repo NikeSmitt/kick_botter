@@ -6,5 +6,5 @@ if __name__ == "__main__":
     # test_api()
     # pprint(len(bot.message_handlers))
     
-    bot.polling(non_stop=True)
+    bot.infinity_polling(skip_pending=True)
     bot.send_message(416205005, 'Bot started...')

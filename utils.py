@@ -2,6 +2,8 @@ import datetime
 import routeros_api
 import config
 
+TIME_FORMAT = "%m/%d/%Y, %H:%M:%S"
+
 
 def create_time_stamp(**kwargs):
     """
