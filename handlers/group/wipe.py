@@ -108,7 +108,8 @@ def wipe_users(message):
 
     bot.send_message(message.from_user.id, info_mes)
     
-    # собираем сообщение с ошибками
-    error_mes = '\n'.join(errors_for_user)
-    bot.send_message(message.from_user.id, error_mes)
+    # собираем сообщение с ошибками, если есть
+    if len(errors_for_user):
+        error_mes = '\n'.join(errors_for_user)
+        bot.send_message(message.from_user.id, error_mes)
 

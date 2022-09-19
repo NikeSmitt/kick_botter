@@ -6,11 +6,6 @@ from logs import log_config
 import config
 from filters.is_root import RootOnlyFilter
 
-
-db = MySQLHandler()
-
-
-
 bot = telebot.TeleBot(config.TOKEN)
 bot.add_custom_filter(RootOnlyFilter(bot))
 

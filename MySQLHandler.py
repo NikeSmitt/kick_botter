@@ -692,7 +692,7 @@ class MySQLHandler:
     
     def is_root(self, telegram_user_id: int):
         """
-        Праверяет наличие прав root у пользователя
+        Проверяет наличие прав root у пользователя
         :param telegram_user_id:
         :return:
         """
