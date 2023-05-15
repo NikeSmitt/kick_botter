@@ -1,32 +1,24 @@
-# grim322Test_1bot
 
-TOKEN = '1969051497:AAGoUNn6-23fpEeYcttYpPLR5BnXhfWFAXg'
+BOT_1_TOKEN = ''
+BOT_2_TOKEN = ''
+# BOT_3_TOKEN = ''
+# BOT_4_TOKEN = ''
 
-# MIKROTIK_LOGIN = 'dev'
-# MIKROTIK_PASS = 'i3Sfyzo9VUM7Nj'
-# MIKROTIK_HOST = '13.48.78.223'
-# MIKROTIK_LOGIN = 'kickbot'
-# MIKROTIK_PASS = 'cb8i7CjuM6QXzi'
-# MIKROTIK_HOST = '213.108.196.129'
+# MIKROTIK_LOGIN = ''
+# MIKROTIK_PASS = ''
+# MIKROTIK_HOST = ''
+# MIKROTIK_LOGIN = ''
+# MIKROTIK_PASS = ''
+# MIKROTIK_HOST = ''
 
 
 mysql_config = {
-  'user': 'root',
-  'password': '8syqxe',
+  'user': '',
+  'password': '',
   'host': '127.0.0.1',
   'database': 'kickbot_db',
   'raise_on_warnings': True
 }
-
-
-# mysql_config = {
-#     'user': 'gen_user',
-#     'password': 'Nikita31337',
-#     'host': '89.223.69.40',
-#     'database': 'default_db',
-#     'raise_on_warnings': True,
-#     'port': '3306'
-# }
 
 
 
